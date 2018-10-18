@@ -13,7 +13,7 @@ class RightLeg(val main: MainActivity) : Thread() {
                 if (isPaused.get()) {
                     synchronized(isPaused) { isPaused.wait() }
                 } else {
-                    main.makeRightStep()
+                    main.makeStep(false)
                 }
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()

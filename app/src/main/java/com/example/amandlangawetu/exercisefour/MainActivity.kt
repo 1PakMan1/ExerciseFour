@@ -26,22 +26,16 @@ class MainActivity : AppCompatActivity() {
 
         start_walking_btn.setOnClickListener {
             if (!isAnyThreadAlive()) {
-                leftLegThread.start()
-                rightLegThread.start()
-                start_walking_btn.text = getString(R.string.stop_walking)
+                go()
                 return@setOnClickListener
             }
 
             if (isAnyThreadPaused()) {
-                leftLegThread.unpause()
-                rightLegThread.unpause()
-                start_walking_btn.text = getString(R.string.stop_walking)
+                resume()
                 return@setOnClickListener
             }
 
-            leftLegThread.pause()
-            rightLegThread.pause()
-            start_walking_btn.text = getString(R.string.start_walking)
+            stop()
         }
     }
 
@@ -54,36 +48,35 @@ class MainActivity : AppCompatActivity() {
     private val rightLegThread = RightLeg(this)
 
     //First step is left = true
-    var isLeft = AtomicBoolean(true)
+    private var isLeft = true
 
-    fun makeLeftStep() {
-        if (isLeft.get()) {
-            println("Left")
-            runOnUiThread(updateViewTask(isLeft.get()))
+    @Synchronized
+    fun makeStep(step : Boolean) {
+        if (step == isLeft) {
+            runOnUiThread(updateViewTask(isLeft))
             Thread.sleep(speed)
-            isLeft.set(false)
-            synchronized(isLeft) {
-                isLeft.notifyAll()
-            }
+            isLeft = !step
+            notifyAll()
         }
-        synchronized(isLeft) {
-            isLeft.wait()
-        }
+        wait()
     }
 
-    fun makeRightStep() {
-        if (!isLeft.get()) {
-            println("Right")
-            runOnUiThread(updateViewTask(isLeft.get()))
-            Thread.sleep(speed)
-            isLeft.getAndSet(true)
-            synchronized(isLeft) {
-                isLeft.notifyAll()
-            }
-        }
-        synchronized(isLeft) {
-            isLeft.wait()
-        }
+    private fun go() {
+        leftLegThread.start()
+        rightLegThread.start()
+        start_walking_btn.text = getString(R.string.stop_walking)
+    }
+
+    private fun stop() {
+        leftLegThread.pause()
+        rightLegThread.pause()
+        start_walking_btn.text = getString(R.string.start_walking)
+    }
+
+    private fun resume() {
+        leftLegThread.unpause()
+        rightLegThread.unpause()
+        start_walking_btn.text = getString(R.string.stop_walking)
     }
 
     private fun updateViewTask(isLeft: Boolean): Runnable {
