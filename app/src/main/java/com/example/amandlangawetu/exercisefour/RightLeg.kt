@@ -1,11 +1,12 @@
 package com.example.amandlangawetu.multithreading
 
-import com.example.amandlangawetu.exercisefour.MainActivity
+import com.example.amandlangawetu.exercisefour.WalkingViewInterface
 import java.util.concurrent.atomic.AtomicBoolean
 
-class RightLeg(val main: MainActivity) : Thread() {
+class RightLeg(val view: WalkingViewInterface) : Thread() {
 
     private val isPaused = AtomicBoolean(false)
+    private val isLeft = false
 
     override fun run() {
         while (!Thread.currentThread().isInterrupted) {
@@ -13,7 +14,7 @@ class RightLeg(val main: MainActivity) : Thread() {
                 if (isPaused.get()) {
                     synchronized(isPaused) { isPaused.wait() }
                 } else {
-                    main.makeStep(false)
+                    view.makeStep(isLeft)
                 }
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()

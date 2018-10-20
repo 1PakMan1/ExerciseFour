@@ -1,16 +1,15 @@
 package com.example.amandlangawetu.exercisefour
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.example.amandlangawetu.multithreading.LeftLeg
 import com.example.amandlangawetu.multithreading.RightLeg
 import com.example.amandlangawetu.multithreading.notifyAll
 import com.example.amandlangawetu.multithreading.wait
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.atomic.AtomicBoolean
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), WalkingViewInterface {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +34,12 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            stop()
+            pause()
         }
     }
 
     @Volatile
     private var speed = 1000L
-
     private val delta = 50
 
     private val leftLegThread = LeftLeg(this)
@@ -51,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var isLeft = true
 
     @Synchronized
-    fun makeStep(step : Boolean) {
+    override fun makeStep(step : Boolean) {
         if (step == isLeft) {
             runOnUiThread(updateViewTask(isLeft))
             Thread.sleep(speed)
@@ -62,12 +60,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun go() {
+        leftLegThread.name = "Left leg"
+        rightLegThread.name = "Right leg"
+
         leftLegThread.start()
         rightLegThread.start()
         start_walking_btn.text = getString(R.string.stop_walking)
     }
 
     private fun stop() {
+        leftLegThread.interrupt()
+        rightLegThread.interrupt()
+    }
+
+    private fun pause() {
         leftLegThread.pause()
         rightLegThread.pause()
         start_walking_btn.text = getString(R.string.start_walking)
@@ -89,6 +95,11 @@ class MainActivity : AppCompatActivity() {
                 left_step.visibility = View.INVISIBLE
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stop()
     }
 
     private fun isAnyThreadAlive(): Boolean {
