@@ -10,11 +10,12 @@ class LeftLeg(val view: WalkingViewInterface) : Thread() {
     override fun run() {
         while (!Thread.currentThread().isInterrupted) {
             try {
-                if (isPaused.get()) {
-                    synchronized(isPaused) { isPaused.wait() }
-                } else {
-                    view.makeStep(isLeft)
+                synchronized(isPaused) {
+                    while (isPaused.get()) {
+                        isPaused.wait()
+                    }
                 }
+                view.makeStep(isLeft)
 
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
