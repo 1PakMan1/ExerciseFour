@@ -3,8 +3,6 @@ package com.example.amandlangawetu.exercisefour
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import com.example.amandlangawetu.multithreading.LeftLeg
-import com.example.amandlangawetu.multithreading.RightLeg
 import com.example.amandlangawetu.multithreading.notifyAll
 import com.example.amandlangawetu.multithreading.wait
 import kotlinx.android.synthetic.main.activity_main.*
@@ -16,11 +14,11 @@ class MainActivity : AppCompatActivity(), WalkingViewInterface {
         setContentView(R.layout.activity_main)
 
         plus_speed_btn.setOnClickListener {
-            speed -= delta
+            speed -= SPEED_DELTA
         }
 
         minus_speed_btn.setOnClickListener {
-            speed += delta
+            speed += SPEED_DELTA
         }
 
         start_walking_btn.setOnClickListener {
@@ -40,10 +38,10 @@ class MainActivity : AppCompatActivity(), WalkingViewInterface {
 
     @Volatile
     private var speed = 1000L
-    private val delta = 50
+    private val SPEED_DELTA = 50
 
-    private val leftLegThread = LeftLeg(this)
-    private val rightLegThread = RightLeg(this)
+    private val leftLegThread = Leg(this, isLeft = true)
+    private val rightLegThread = Leg(this, isLeft = false)
 
     //First step is left = true
     private var isLeft = true
